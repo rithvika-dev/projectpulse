@@ -1,0 +1,465 @@
+###############################################################################
+# PROJECTPULSE REST CLIENT TEST SUITE
+# "Agile Project & Team Collaboration Suite"
+# Compatible with VS Code REST Client Extension
+###############################################################################
+
+@baseUrl = http://localhost:5000/api
+@token = {{loginAdmin.response.body.data.token}}
+@devToken = {{loginDev.response.body.data.token}}
+@projectId = 650000000000000000000001
+@taskId = 650000000000000000000002
+@sprintId = 650000000000000000000003
+
+###############################################################################
+# 1. SERVER HEALTH
+###############################################################################
+
+### Check Server Health
+GET {{baseUrl}}/health
+
+###############################################################################
+# 2. AUTHENTICATION & USERS
+###############################################################################
+
+### Register New User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Sarah Connor",
+  "email": "sarah.connor@projectpulse.com",
+  "password": "Password@123",
+  "role": "developer",
+  "organizationName": "Cyberdyne Systems"
+}
+
+###
+
+# @name loginAdmin
+### Login as Organization Admin (Elena Rostova)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@projectpulse.com",
+  "password": "Admin@123"
+}
+
+###
+
+# @name loginDev
+### Login as Developer (Devon Reed)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "dev@projectpulse.com",
+  "password": "Dev@123"
+}
+
+###
+
+# @name loginPM
+### Login as Project Manager (Marcus Vance)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "pm@projectpulse.com",
+  "password": "Pm@123"
+}
+
+###
+
+### Get Current User Profile (Me)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### Update Current User Profile
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "VP of Engineering & Product Operations",
+  "phone": "+1 (555) 987-6543",
+  "bio": "Directing multi-disciplinary engineering pods and agile delivery excellence."
+}
+
+###
+
+### Get All Users in Organization
+GET {{baseUrl}}/auth/users
+Authorization: Bearer {{token}}
+
+###
+
+### Logout User
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 3. ORGANIZATIONS & INVITATIONS
+###############################################################################
+
+### Get Organizations
+GET {{baseUrl}}/organizations
+Authorization: Bearer {{token}}
+
+###
+
+### Create Organization
+POST {{baseUrl}}/organizations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Acuity Systems",
+  "description": "Enterprise cloud intelligence platform",
+  "industry": "Cloud Infrastructure"
+}
+
+###
+
+### Send Member Invitation
+POST {{baseUrl}}/organizations/650000000000000000000001/invite
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "newengineer@partner.com",
+  "role": "developer"
+}
+
+###############################################################################
+# 4. TEAMS & WORKLOAD
+###############################################################################
+
+### Get All Teams
+GET {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+
+###
+
+### Create Team
+POST {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Core Platform & Infrastructure",
+  "description": "Site reliability, Kubernetes clusters, and observability.",
+  "color": "#2F6B5F"
+}
+
+###
+
+### Get Team Details & Workload
+GET {{baseUrl}}/teams/650000000000000000000001
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 5. PROJECTS
+###############################################################################
+
+### Get All Projects (Filtered by Status)
+GET {{baseUrl}}/projects?status=Active
+Authorization: Bearer {{token}}
+
+###
+
+### Get All Projects (Search Query)
+GET {{baseUrl}}/projects?search=Portal
+Authorization: Bearer {{token}}
+
+###
+
+### Create Project
+POST {{baseUrl}}/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cloud Security Portal",
+  "projectCode": "PRJ-CSP",
+  "description": "Next-gen zero trust posture assessment and compliance monitoring.",
+  "priority": "High",
+  "status": "Planning",
+  "startDate": "2026-10-01",
+  "endDate": "2026-12-31",
+  "budget": 75000,
+  "tags": ["Security", "Cloud", "ZeroTrust"]
+}
+
+###
+
+### Get Project By ID with Summary Metrics
+GET {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Update Project
+PUT {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "priority": "Critical",
+  "status": "Active",
+  "progress": 70
+}
+
+###
+
+### Get Project Timeline (Milestones + Sprints)
+GET {{baseUrl}}/projects/{{projectId}}/timeline
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 6. MILESTONES
+###############################################################################
+
+### Get Milestones for Project
+GET {{baseUrl}}/milestones?project={{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Create Milestone
+POST {{baseUrl}}/milestones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Alpha Customer Onboarding",
+  "description": "First 10 pilot clients onboarded with positive CSAT.",
+  "project": "{{projectId}}",
+  "startDate": "2026-09-24",
+  "dueDate": "2026-10-24",
+  "status": "In Progress",
+  "progress": 30
+}
+
+###
+
+### Update Milestone Status & Progress
+PUT {{baseUrl}}/milestones/650000000000000000000001
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Completed",
+  "progress": 100
+}
+
+###############################################################################
+# 7. SPRINTS
+###############################################################################
+
+### Get Sprints for Project
+GET {{baseUrl}}/sprints?project={{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Create Sprint
+POST {{baseUrl}}/sprints
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Sprint 4: Performance & Load Tuning",
+  "project": "{{projectId}}",
+  "goal": "Improve 99th percentile API latency to under 120ms.",
+  "startDate": "2026-10-25",
+  "endDate": "2026-11-08"
+}
+
+###
+
+### Start Sprint
+POST {{baseUrl}}/sprints/{{sprintId}}/start
+Authorization: Bearer {{token}}
+
+###
+
+### Complete Sprint
+POST {{baseUrl}}/sprints/{{sprintId}}/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "moveToBacklog": true
+}
+
+###############################################################################
+# 8. TASKS & KANBAN BOARD
+###############################################################################
+
+### Get Tasks (Kanban Query by Project)
+GET {{baseUrl}}/tasks?project={{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Get My Assigned Tasks
+GET {{baseUrl}}/tasks?myTasks=true
+Authorization: Bearer {{token}}
+
+###
+
+### Create Task
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Optimize MongoDB indexing on Activity query collection",
+  "description": "Create compound indexes on organization and timestamp for sub-10ms response.",
+  "project": "{{projectId}}",
+  "priority": "High",
+  "status": "To Do",
+  "storyPoints": 3,
+  "dueDate": "2026-10-05",
+  "labels": ["Backend", "Performance", "Database"]
+}
+
+###
+
+### Update Task Status (Kanban Drag-and-Drop)
+PATCH {{baseUrl}}/tasks/{{taskId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "In Progress",
+  "order": 1
+}
+
+###
+
+### Update Full Task Details
+PUT {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "priority": "Critical",
+  "storyPoints": 5,
+  "blockers": ["Waiting on staging database access"]
+}
+
+###############################################################################
+# 9. ISSUES
+###############################################################################
+
+### Get Issues
+GET {{baseUrl}}/issues?project={{projectId}}&status=Open
+Authorization: Bearer {{token}}
+
+###
+
+### Create Issue
+POST {{baseUrl}}/issues
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Rate limiter triggers incorrectly on internal health check ping",
+  "description": "The ALB health probe is sending 100 req/min from single IP causing false positive 429 errors.",
+  "project": "{{projectId}}",
+  "severity": "Major",
+  "priority": "High",
+  "status": "Open"
+}
+
+###
+
+### Update Issue / Resolve Issue
+PUT {{baseUrl}}/issues/650000000000000000000001
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Resolved",
+  "resolution": "Whitelisted private VPC subnet CIDR range from Express rate limiter middleware."
+}
+
+###############################################################################
+# 10. COMMENTS
+###############################################################################
+
+### Add Comment to Task
+POST {{baseUrl}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entityType": "Task",
+  "entityId": "{{taskId}}",
+  "content": "I have created the indexes in staging. Average query latency dropped from 120ms to 4ms."
+}
+
+###
+
+### Get Comments for Entity
+GET {{baseUrl}}/comments/Task/{{taskId}}
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 11. ACTIVITY FEED
+###############################################################################
+
+### Get Organization Activity Feed
+GET {{baseUrl}}/activities?limit=20
+Authorization: Bearer {{token}}
+
+###
+
+### Get Project Activity Feed
+GET {{baseUrl}}/activities?project={{projectId}}&limit=10
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 12. NOTIFICATIONS
+###############################################################################
+
+### Get Notifications
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{token}}
+
+###
+
+### Mark All Notifications As Read
+PATCH {{baseUrl}}/notifications/read-all
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 13. REPORTS & ANALYTICS
+###############################################################################
+
+### Get Organization Dashboard Overview
+GET {{baseUrl}}/reports/overview
+Authorization: Bearer {{token}}
+
+###
+
+### Get Project Analytics Report
+GET {{baseUrl}}/reports/project/{{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Get Team Workload Analytics
+GET {{baseUrl}}/reports/workload/{{projectId}}
+Authorization: Bearer {{token}}
+
+###
+
+### Get Sprint Burndown Report
+GET {{baseUrl}}/reports/sprint/{{sprintId}}
+Authorization: Bearer {{token}}
